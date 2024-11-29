@@ -1,0 +1,556 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Eventos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    
+    <div class="container mt-5">
+        <h1>Gestión de Eventos</h1>
+
+        <!-- Botón para abrir el modal de calcular costo de boletas -->
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalCalcularCostoBoletas">
+            Calcular Costo de Boletas
+        </button>
+
+    
+        <!-- Botón para abrir el modal de agregar concierto -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarConcierto">
+            Agregar Concierto
+        </button>
+    
+        <!-- Botón para abrir el modal de agregar conferencia -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarConferencia">
+            Agregar Conferencia
+        </button>
+    
+        <!-- Tablas de conciertos -->
+        <h2>Conciertos</h2>
+        <table class="table table-striped" id="tablaConciertos">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Fecha</th>
+                    <th>Lugar</th>
+                    <th>Artista</th>
+                    <th>Duración</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for concierto in conciertos %}
+                <tr>
+                    <td>{{ concierto.nombre }}</td>
+                    <td>{{ concierto.fecha }}</td>
+                    <td>{{ concierto.lugar }}</td>
+                    <td>{{ concierto.artista }}</td>
+                    <td>{{ concierto.duracion }}</td>
+                    <td>
+
+                        <button 
+                        class="btn btn-warning btn-editar" 
+                        data-id="{{ concierto.id }}" 
+                        data-tipo="concierto" 
+                        data-toggle="modal" 
+                        data-target="#modalEditarEvento">
+                        Editar Concierto
+                        </button>
+
+                        <button class="btn btn-danger btn-eliminar" data-id="{{ concierto.id }}" data-tipo="concierto">Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+        <!-- Tablas de conferencias -->
+        <h2>Conferencias</h2>
+        <table class="table table-striped" id="tablaConferencias">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Fecha</th>
+                    <th>Lugar</th>
+                    <th>Tema</th>
+                    <th>Orador</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conferencia in conferencias %}
+                <tr>
+                    <td>{{ conferencia.nombre }}</td>
+                    <td>{{ conferencia.fecha }}</td>
+                    <td>{{ conferencia.lugar }}</td>
+                    <td>{{ conferencia.tema }}</td>
+                    <td>{{ conferencia.orador }}</td>
+                    <td>
+                        <!-- Botón de editar para conferencia -->
+                        <button 
+                        class="btn btn-warning btn-editar" 
+                        data-id="{{ conferencia.id }}" 
+                        data-tipo="conferencia" 
+                        data-toggle="modal" 
+                        data-target="#modalEditarEvento">
+                        Editar Conferencia
+                        </button>
+
+                        <button class="btn btn-danger btn-eliminar" data-id="{{ conferencia.id }}" data-tipo="conferencia">Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+<!-- -------------------------------------------------------------------------------------------------- -->
+
+<!-- Modal para agregar concierto -->
+<div class="modal fade" id="modalAgregarConcierto" tabindex="-1" role="dialog" aria-labelledby="modalAgregarConciertoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarConciertoLabel">Agregar Concierto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formAgregarConcierto" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nombreConcierto">Nombre del Concierto</label>
+                        <input type="text" class="form-control" id="nombreConcierto" name="nombre" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaConcierto">Fecha</label>
+                        <input type="datetime-local" class="form-control" id="fechaConcierto" name="fecha" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lugarConcierto">Lugar</label>
+                        <input type="text" class="form-control" id="lugarConcierto" name="lugar" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="artistaConcierto">Artista</label>
+                        <input type="text" class="form-control" id="artistaConcierto" name="artista" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracionConcierto">Duración (minutos)</label>
+                        <input type="number" class="form-control" id="duracionConcierto" name="duracion" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar Concierto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- -------------------------------------------------------------------------------------------------- -->
+
+
+<!-- Modal para agregar conferencia -->
+<div class="modal fade" id="modalAgregarConferencia" tabindex="-1" role="dialog" aria-labelledby="modalAgregarConferenciaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarConferenciaLabel">Agregar Conferencia</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formAgregarConferencia" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nombreConferencia">Nombre de la Conferencia</label>
+                        <input type="text" class="form-control" id="nombreConferencia" name="nombre" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaConferencia">Fecha</label>
+                        <input type="datetime-local" class="form-control" id="fechaConferencia" name="fecha" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lugarConferencia">Lugar</label>
+                        <input type="text" class="form-control" id="lugarConferencia" name="lugar" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="temaConferencia">Tema</label>
+                        <input type="text" class="form-control" id="temaConferencia" name="tema" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oradorConferencia">Orador</label>
+                        <input type="text" class="form-control" id="oradorConferencia" name="orador" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar Conferencia</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- -------------------------------------------------------------------------------------------------- -->
+
+
+    <!-- Modal para eliminar evento -->
+    <div class="modal fade" id="modalEliminarEvento" tabindex="-1" role="dialog" aria-labelledby="modalEliminarEventoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEliminarEventoLabel">Eliminar Evento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este evento?
+                    <form id="formEliminarEvento" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="evento_id" id="evento_id">
+                        <input type="hidden" name="tipo_evento" id="tipo_evento">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- -------------------------------------------------------------------------------------------------- -->
+<!-- Modal para editar evento -->
+<div class="modal fade" id="modalEditarEvento" tabindex="-1" role="dialog" aria-labelledby="modalEditarEventoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarEventoLabel">Editar Evento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarEvento" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="eventoId" name="id"> <!-- Campo oculto para el ID del evento -->
+                    <input type="hidden" id="tipoEvento" name="tipo_evento"> <!-- Campo oculto para el tipo de evento -->
+                
+                    <!-- Otros campos del formulario -->
+                    <div class="form-group">
+                        <label for="nombreEvento">Nombre del Evento</label>
+                        <input type="text" class="form-control" id="nombreEvento" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaEvento">Fecha</label>
+                        <input type="datetime-local" class="form-control" id="fechaEvento" name="fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lugarEvento">Lugar</label>
+                        <input type="text" class="form-control" id="lugarEvento" name="lugar" required>
+                    </div>
+                
+                    <!-- Campos específicos de conciertos -->
+                    <div class="form-group concierto-fields d-none">
+                        <label for="artistaEvento">Artista</label>
+                        <input type="text" class="form-control" id="artistaEvento" name="artista">
+                    </div>
+                    <div class="form-group concierto-fields d-none">
+                        <label for="duracionEvento">Duración (minutos)</label>
+                        <input type="number" class="form-control" id="duracionEvento" name="duracion">
+                    </div>
+                
+                    <!-- Campos específicos de conferencias -->
+                    <div class="form-group conferencia-fields d-none">
+                        <label for="temaEvento">Tema</label>
+                        <input type="text" class="form-control" id="temaEvento" name="tema">
+                    </div>
+                    <div class="form-group conferencia-fields d-none">
+                        <label for="oradorEvento">Orador</label>
+                        <input type="text" class="form-control" id="oradorEvento" name="orador">
+                    </div>
+                
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>                   
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- -------------------------------------------------------------------------------------------------- -->
+<!-- Modal para Calcular Costo de Boletas -->
+<div class="modal fade" id="modalCalcularCostoBoletas" tabindex="-1" role="dialog" aria-labelledby="modalCalcularCostoBoletasLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCalcularCostoBoletasLabel">Calcular Costo de Boletas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formCalcularCostoBoletas" method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="precioBase">Precio Base de Boleta</label>
+                        <input type="number" class="form-control" id="precioBase" name="precio_base" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cantidadBoletas">Cantidad de Boletas</label>
+                        <input type="number" class="form-control" id="cantidadBoletas" name="cantidad_boletas" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Calcular Costo</button>
+                </form>
+                <div id="resultadoCosto" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- -------------------------------------------------------------------------------------------------- -->
+
+<script>
+
+// Crear evento de concierto
+$('#formAgregarConcierto').submit(function(e) {
+    e.preventDefault(); // Evita el comportamiento por defecto del formulario
+
+    const formData = new FormData(this);
+
+    // Verifica los datos antes de enviarlos
+    formData.forEach((value, key) => {
+        console.log(key, value); // Muestra las claves y los valores que se están enviando
+    });
+
+    $.ajax({
+        url: '{% url "crear_evento" %}',  // URL donde se procesa el evento
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            console.log(response);  // Muestra la respuesta del servidor
+            if (response.status === 'success') {
+                alert(response.mensaje);
+                location.reload();  // Recarga la página para mostrar los nuevos datos
+            } else {
+                alert('Error al crear el concierto: ' + response.mensaje);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+            alert('Hubo un error al guardar el concierto.');
+        }
+    });
+});
+
+// Crear evento de conferencia
+$('#formAgregarConferencia').submit(function(e) {
+    e.preventDefault(); // Evita el comportamiento por defecto del formulario
+
+    const formData = new FormData(this);
+    $.ajax({
+        url: '{% url "crear_evento" %}',  // URL donde se procesa el evento
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                alert(response.mensaje);
+                location.reload();  // Recarga la página para mostrar los nuevos datos
+            } else {
+                alert('Error al crear la conferencia: ' + response.mensaje);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+            alert('Hubo un error al guardar la conferencia.');
+        }
+    });
+});
+
+// ---------------------------------------------------------------------------------
+
+// EDITAR
+// Mostrar los datos del evento en el modal de edición
+$(document).on('click', '.btn-editar', function () {
+    const eventoId = $(this).data('id'); // Captura el ID del evento
+    const tipoEvento = $(this).data('tipo'); // Captura el tipo de evento (concierto o conferencia)
+
+    // Verifica que se está capturando el ID correctamente
+    console.log("ID del evento:", eventoId);
+    console.log("Tipo de evento:", tipoEvento);
+
+    // Llenar los campos del modal con los datos del evento
+    $.ajax({
+        url: '{% url "obtener_evento" %}', // URL para obtener los datos del evento
+        method: 'GET',
+        data: { id: eventoId, tipo: tipoEvento },
+        success: function (response) {
+            if (response.status === 'success') {
+                const evento = response.data;
+
+                // Asignar los valores al formulario del modal
+                $('#nombreEvento').val(evento.nombre);
+                $('#fechaEvento').val(evento.fecha);
+                $('#lugarEvento').val(evento.lugar);
+
+                if (tipoEvento === 'concierto') {
+                    $('#artistaEvento').val(evento.artista);
+                    $('#duracionEvento').val(evento.duracion);
+                    $('.concierto-fields').removeClass('d-none');
+                    $('.conferencia-fields').addClass('d-none');
+                } else if (tipoEvento === 'conferencia') {
+                    $('#temaEvento').val(evento.tema);
+                    $('#oradorEvento').val(evento.orador);
+                    $('.conferencia-fields').removeClass('d-none');
+                    $('.concierto-fields').addClass('d-none');
+                }
+
+                // Asignar el ID y el tipo al formulario
+                $('#eventoId').val(eventoId); // Este es el campo oculto con el ID
+                $('#tipoEvento').val(tipoEvento); // Este es el tipo de evento
+            } else {
+                alert('Error al cargar los datos del evento.');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error al obtener los datos:", error);
+        }
+    });
+});
+
+
+$('#formEditarEvento').submit(function (e) {
+    e.preventDefault();
+
+    const eventoId = $('#eventoId').val(); // Asegúrate de que este valor no sea vacío
+    const formData = new FormData(this);
+
+    if (!eventoId) {
+        alert('No se puede editar el evento porque no se encontró el ID.');
+        return;
+    }
+
+    $.ajax({
+        url: `/editar_evento/${eventoId}/`, // Asegúrate de que la URL contiene el ID
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.status === 'success') {
+                alert(response.mensaje);
+                location.reload();
+            } else {
+                alert('Error al guardar los cambios: ' + response.mensaje);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al guardar los cambios:', error);
+            console.error('Response:', xhr.responseText);
+            alert('Hubo un error al guardar los cambios.');
+        }
+    });
+});
+
+
+// ---------------------------------------------------------------------------------
+
+
+    // Eliminar evento
+    $('.btn-eliminar').click(function() {
+        const eventoId = $(this).data('id');
+        const tipoEvento = $(this).data('tipo');
+
+        // Cargar los datos para eliminar
+        $('#evento_id').val(eventoId);
+        $('#tipo_evento').val(tipoEvento);
+
+        $('#modalEliminarEvento').modal('show');
+    });
+
+    $('#formEliminarEvento').submit(function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '{% url "eliminar_evento" %}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert(response.mensaje);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Error al eliminar el evento.');
+            }
+        });
+    });
+
+
+// ---------------------------------------------------------------------------------
+// Crear evento de calcular costo de boletas
+$('#formCalcularCostoBoletas').submit(function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    // Muestra los datos en la consola para verificar que se están enviando correctamente
+    formData.forEach((value, key) => {
+        console.log(key, value);
+    });
+
+    $.ajax({
+        url: '{% url "calcular_costo_boletas" %}',  // La URL de la vista para calcular el costo
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            // Mostrar el resultado en el modal
+            if (response.status === 'success') {
+                $('#resultadoCosto').html(`<strong>Costo Total: </strong>$${response.costo_total}`);
+            } else {
+                alert('Error al calcular el costo de las boletas: ' + response.mensaje);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+            alert('Hubo un error al calcular el costo de las boletas.');
+        }
+    });
+});
+
+
+</script>
+
+<!-- Scripts de Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>
